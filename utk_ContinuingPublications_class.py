@@ -103,6 +103,17 @@ class ContinuingPublications_Volume:
         backup_directory_path.rename(self.directory_path)
 
     def get_file_paths(self, with_extension):
+        '''
+        -- Purpose --
+        Get all file Paths with_extension in self.directory_path
+
+        -- Arguments --
+        with_extension: type=string; extension to use for globbing
+
+        -- Returns --
+        file_paths_list: type:list; list of Path-like objects, 1 Path-like object
+        per file_path in self.directory_path
+        '''
         formatted_extension = get_formatted_extension(with_extension)
         file_paths_list = sorted(self.directory_path.glob(f'*{formatted_extension}'))
         return file_paths_list
@@ -143,7 +154,7 @@ class ContinuingPublications_Volume:
         None
 
         -- Returns --
-        None
+        ingest_directory_path: type=Path-like object; Path to the directory for ingest
         '''
         import datetime
 
@@ -183,6 +194,24 @@ class ContinuingPublications_Volume:
             copy_image_path = image_subdirectory_path.joinpath(new_image_name)
             shutil.copyfile(image_path, copy_image_path)
 
+        return ingest_directory_path
+
+    def create_zip_file(self, directory):
+        '''
+        -- Purpose --
+        Create a zip file from directory_path
+        To be used with create_islandora_ingest_directory
+
+        -- Arguments --
+        directory_path: type=Path-like object; directory to compress into a Zip file
+
+        -- Returns --
+        True/False: type=boolean; whether or not {directory_path.name}.zip exists
+        in {directory_path.parents[0]}
+        '''
+        directory_path = Path(directory)
+        zip_file_name = directory_path.name
+        shutil.make_archive(archive_name_no_ext, "zip", tmp_dir, '.')
 
 if __name__ == "__main__":
 
