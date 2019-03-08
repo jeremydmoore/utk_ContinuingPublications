@@ -42,7 +42,14 @@ class ContinuingPublications_Volume:
 
     def backup_volume(self):
         '''
+        -- Purpose --
         Copy all files in directory to backup directory with name: <directory>_backup
+
+        -- Arguments --
+        None
+
+        -- Returns --
+        backup_directory_path: type=Path-like object; returns absolute path to backup directory
         '''
         backup_directory_name = f'{self.directory_path.name}_backup'
         backup_directory_path = self.directory_path.parents[0].joinpath(backup_directory_name)
@@ -53,11 +60,36 @@ class ContinuingPublications_Volume:
         shutil.copytree(self.directory_path, backup_directory_path)
 
         if backup_directory_path.exists():
-            return backup_directory_path
+            return backup_directory_path.resolve()
+
+    def remove_backup(self):
+        '''
+        -- Purpose --
+        Remove the backup volume created by self.backup_volume()
+
+        -- Arguments --
+        None
+
+        -- Returns --
+        True/False: type=boolean; True/False result of _backup.is_dir()
+        '''
+        backup_directory_name = f'{self.directory_path.name}_backup'
+        backup_directory_path = self.directory_path.parents[0].joinpath(backup_directory_path)
+
+        # remove backup directory
+        shutil.rmtree(backup_directory_path)
+
+        return backup_directory_path.is_dir()
 
     def undo_backup(self):
         backup_directory_name = f'{self.directory_path.name}_backup'
         backup_directory_path = self.directory_path.parents[0].joinpath(backup_directory_name)
+
+        # remove processed directory
+        shutil.rmtree(self.directory_path)
+
+        # rename backup directory to original directory name
+        backup_directory_path.rename(self.directory_path)
 
     def get_file_paths(self, with_extension):
         formatted_extension = get_formatted_extension(with_extension)
@@ -65,7 +97,11 @@ class ContinuingPublications_Volume:
         return file_paths_list
 
     def rename_files_to_directory_name(self, with_extension, zerofill=4):
+
         formatted_extension = get_formatted_extension(with_extension)
+
+        # extension will be lower-case and tif/jpg instead of tiff/jpeg
+        remediated_extension = get_formatted_extension(with_extension, remediate=True)
 
         # get total number of files and the paths for files to rename
         file_paths_list = self.get_file_paths(formatted_extension)
@@ -80,12 +116,24 @@ class ContinuingPublications_Volume:
 
         count = 0
         for index, file_path in enumerate(file_paths_list, start=1):
-            new_file_name = f'{self.directory_path.name}_{str(index).zfill(zerofill)}{file_path.suffix}'
+            new_file_name = f'{self.directory_path.name}_{str(index).zfill(zerofill)}{remediated_extension}'
             new_file_path = file_path.parents[0].joinpath(new_file_name)
             file_path.rename(new_file_path)
             count = index
 
         print(f' Renamed {count} "{formatted_extension}"s')
+
+    def create_islandora_ingest(self):
+        '''
+        -- Purpose --
+        Create Islandora ingest directory
+
+        -- Arguments --
+        None
+
+        -- Returns --
+
+        '''
 
 if __name__ == "__main__":
 
@@ -104,4 +152,4 @@ if __name__ == "__main__":
     volume = ContinuingPublications_Volume(directory_path)
 
     # rename files
-    volume.rename_files_to_directory_name('.tif')
+    volume.rename_files_to_directory_name('.tiff')
