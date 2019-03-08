@@ -65,7 +65,7 @@ class ContinuingPublications_Volume:
     def remove_backup(self):
         '''
         -- Purpose --
-        Remove the backup volume created by self.backup_volume()
+        Deletes the backup volume created by self.backup_volume()
 
         -- Arguments --
         None
@@ -82,6 +82,17 @@ class ContinuingPublications_Volume:
         return backup_directory_path.is_dir()
 
     def undo_backup(self):
+        '''
+        -- Purpose --
+        Deletes the processed directory and renames the backup directory to the
+        original directory name
+
+        -- Arguments --
+        None
+
+        -- Returns --
+        None
+        '''
         backup_directory_name = f'{self.directory_path.name}_backup'
         backup_directory_path = self.directory_path.parents[0].joinpath(backup_directory_name)
 
