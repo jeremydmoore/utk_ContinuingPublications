@@ -74,7 +74,7 @@ class ContinuingPublications_Volume:
         True/False: type=boolean; True/False result of _backup.is_dir()
         '''
         backup_directory_name = f'{self.directory_path.name}_backup'
-        backup_directory_path = self.directory_path.parents[0].joinpath(backup_directory_path)
+        backup_directory_path = self.directory_path.parents[0].joinpath(backup_directory_name)
 
         # remove backup directory
         shutil.rmtree(backup_directory_path)
@@ -134,17 +134,55 @@ class ContinuingPublications_Volume:
 
         print(f' Renamed {count} "{formatted_extension}"s')
 
-    def create_islandora_ingest(self):
+    def create_islandora_ingest_directory(self):
         '''
         -- Purpose --
-        Create Islandora ingest directory
+        Create Islandora ingest directory with TIFF in nested structure
 
         -- Arguments --
         None
 
         -- Returns --
-
+        None
         '''
+        import datetime
+
+        # get image paths and number of images
+        extension = 'tif'
+        image_paths_list = self.get_file_paths(extension)
+        number_of_images = len(image_paths_list)
+
+        # set ingest stub to add to directory name
+        ingest_stub = 'CreatedForIslandoraIngest'
+        # get today's date in YYYY-MM-DD format and add to ingest stub
+        todays_date = datetime.datetime.now().strftime('%Y-%m-%d')
+        ingest_stub = f'{ingest_stub}_{todays_date}'
+
+        # create ingest directory
+        ingest_directory_name = f'{self.directory_path.name}_{ingest_stub}'
+        ingest_directory_path = self.directory_path.parents[0].joinpath(ingest_directory_name)
+        try:
+            ingest_directory_path.mkdir()
+        except FileExistsError:  # directory already exists
+            print(f'WARNING: ingest directory already exists at {ingest_directory_path}')
+
+        print(f'Processing {number_of_images} in {self.directory_path.name}')
+
+        # for each image
+        for index, image_path in enumerate(image_paths_list, start=1):
+
+            # create a sub-directory with a simple index number
+            image_subdirectory_path = ingest_directory_path.joinpath(str(index))
+            try:
+                image_subdirectory_path.mkdir()
+            except FileExistsError:
+                print(f'Sub-directory already exists at {image_subdirectory_path}')
+
+            # set new image name and copy path, then copy image
+            new_image_name = f'page {str(index)}{image_path.suffix}'
+            copy_image_path = image_subdirectory_path.joinpath(new_image_name)
+            shutil.copyfile(image_path, copy_image_path)
+
 
 if __name__ == "__main__":
 
@@ -164,3 +202,6 @@ if __name__ == "__main__":
 
     # rename files
     volume.rename_files_to_directory_name('.tiff')
+
+    # create Islanodra ingest file
+    volume.create_islandora_ingest_directory()
