@@ -196,7 +196,7 @@ class ContinuingPublications_Volume:
 
         return ingest_directory_path
 
-    def create_zip_file(self, directory):
+    def create_zip_file(self, directory_to_zip):
         '''
         -- Purpose --
         Create a zip file from directory_path
@@ -209,9 +209,9 @@ class ContinuingPublications_Volume:
         True/False: type=boolean; whether or not {directory_path.name}.zip exists
         in {directory_path.parents[0]}
         '''
-        directory_path = Path(directory)
-        zip_file_name = directory_path.name
-        shutil.make_archive(archive_name_no_ext, "zip", tmp_dir, '.')
+        directory_to_zip_path = Path(directory_to_zip)
+        zip_file_name = self.directory_path.name
+        shutil.make_archive(zip_file_name, "zip", root_dir=directory_to_zip_path, '.')
 
 if __name__ == "__main__":
 
