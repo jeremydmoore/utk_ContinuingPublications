@@ -119,7 +119,18 @@ class ContinuingPublications_Volume:
         return file_paths_list
 
     def rename_files_to_directory_name(self, with_extension, zerofill=4):
+        '''
+        -- Purpose --
+        Rename all files {with_extension} to {self.directory_path.name}_{str(index).zfill(zerofill)}
+        *Note: will currently remediate extensions to lower-case and change tiff/jpeg to tif/jpg
 
+        -- Arguments --
+        with_extension: type=string; extension to rename
+        zerofill: type=integer; how many digits to zeropad
+
+        -- Returns --
+        None
+        '''
         formatted_extension = get_formatted_extension(with_extension)
 
         # extension will be lower-case and tif/jpg instead of tiff/jpeg
@@ -210,8 +221,7 @@ class ContinuingPublications_Volume:
         in {directory_path.parents[0]}
         '''
         directory_to_zip_path = Path(directory_to_zip)
-        zip_file_name = self.directory_path.name
-        shutil.make_archive(zip_file_name, "zip", root_dir=directory_to_zip_path, '.')
+        shutil.make_archive(self.directory_path, "zip", root_dir=directory_to_zip_path)
 
 if __name__ == "__main__":
 
@@ -233,4 +243,7 @@ if __name__ == "__main__":
     volume.rename_files_to_directory_name('.tiff')
 
     # create Islanodra ingest file
-    volume.create_islandora_ingest_directory()
+    ingest_directory_path = volume.create_islandora_ingest_directory()
+
+    # create zip file
+    volume.create_zip_file(ingest_directory_path)
